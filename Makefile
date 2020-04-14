@@ -9,8 +9,12 @@ RM		=		rm -rf
 SRC		=		src/main.c			\
 				src/get_next_line.c	\
 				src/my_ftp.c	\
+				src/server-pi/client_connexion.c	\
 				src/server-pi/linked_list_ut.c	\
 				src/server-pi/server_pi.c	\
+				src/ftp-commands/auth.c	\
+				src/ftp-commands/retr.c	\
+				src/ftp-commands/data_transfert_init.c	\
 
 OBJ		=		$(SRC:%.c=$(BUILD_DIR)/%.o)
 
@@ -20,7 +24,7 @@ override CFLAGS		+=	-Wall -Wextra -Werror
 override CPPFLAGS	+=	-I./include
 override DEPFLGAS	+=	-MT $@ -MMD -MP -MF $(@:.o=.d)
 
-NAME	=		my_ftp
+NAME	=		myftp
 
 $(NAME):	$(OBJ)
 	$(CC) $^ $(CFLAGS) -o $@ 
