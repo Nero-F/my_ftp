@@ -5,6 +5,7 @@
 ** linked list utilities
 */
 
+#include <dirent.h>
 #include "my_ftp.h"
 
 void init_client_node(client_list_t *node, int fd, char *path, int port)

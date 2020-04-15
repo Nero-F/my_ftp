@@ -20,7 +20,7 @@
 #define REQUIRED_ARGUMENT   1
 #define NO_ARGUMENT         0
 
-#define MAX_CLIENT          5
+#define MAX_CLIENT          42 
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -101,6 +101,7 @@ void pass_f(ftp_t *ftp, char *arg, client_list_t *client);
 void pasv_f(ftp_t *ftp, char *arg, client_list_t *client);
 void port_f(ftp_t *ftp, char *arg, client_list_t *client);
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client);
+void stor_f(ftp_t *ftp, char *arg, client_list_t *client);
 
 /* client gestion */
 

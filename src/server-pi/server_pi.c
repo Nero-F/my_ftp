@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include <sys/select.h>
+#include <dirent.h>
 #include "my_ftp.h"
 
 const ftp_cmd_t ftp_cmd[] = {
@@ -49,7 +50,14 @@ void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
 
 void cdup_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    dprintf(client->fd, "200 CDUP okay.\n");
+    char *path = realpath(strcat(client->path_dist, "/../"), NULL);
+
+    if (!path) {
+        perror("realpath() -> cdup()");
+        return;
+    }
+    client->path_dist = path;
+    dprintf(client->fd, "250 Directory successfilly changed.\n");
 }
 
 void cwd_f(ftp_t *ftp, char *arg, client_list_t *client)
@@ -74,8 +82,7 @@ void help_f(ftp_t *ftp, char *arg, client_list_t *client)
 
 void pwd_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    printf("here\n");
-    dprintf(client->fd, "257 \"%s\"", client->path_dist);
+    dprintf(client->fd, "257 \"%s\"\n", client->path_dist);
 }
 
 static void protocole_interpreter(ftp_t *ftp, int fd, \
@@ -126,9 +133,9 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 
 int server_pi(ftp_t *ftp)
 {
-    void (*fct_ptr[13])(ftp_t *, char *, client_list_t *) = { // TODO: deplacer ça dans init_struct
+    void (*fct_ptr[14])(ftp_t *, char *, client_list_t *) = { // TODO: deplacer ça dans init_struct
         &noop_f, &cdup_f, &port_f, &user_f, &pass_f, cwd_f, \
-        &dele_f, &quit_f, &pasv_f, &list_f, &retr_f, &help_f, &pwd_f
+        &dele_f, &quit_f, &pasv_f, &list_f, &retr_f, &stor_f, &help_f, &pwd_f
     };
 
     FD_ZERO(&ftp->rfds);

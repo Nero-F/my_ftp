@@ -14,6 +14,7 @@ SRC		=		src/main.c			\
 				src/server-pi/server_pi.c	\
 				src/ftp-commands/auth.c	\
 				src/ftp-commands/retr.c	\
+				src/ftp-commands/stor.c	\
 				src/ftp-commands/data_transfert_init.c	\
 
 OBJ		=		$(SRC:%.c=$(BUILD_DIR)/%.o)

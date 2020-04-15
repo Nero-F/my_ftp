@@ -51,8 +51,8 @@ static void init_ftp(ftp_t *ftp, int port, char *path)
     ftp->buffer = NULL;
 
     ftp->port = port;
-    ftp->path = path;
-
+    chdir(path);
+    ftp->path = realpath(path, NULL);
     ftp->clients.socket = 0;
     ftp->clients.addr_len = sizeof(ftp->clients.addr);
     memset(&ftp->clients.addr, 0, ftp->clients.addr_len);
