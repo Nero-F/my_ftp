@@ -51,7 +51,6 @@ static void init_ftp(ftp_t *ftp, int port, char *path)
     ftp->buffer = NULL;
 
     ftp->port = port;
-    chdir(path);
     ftp->path = realpath(path, NULL);
     ftp->clients.socket = 0;
     ftp->clients.addr_len = sizeof(ftp->clients.addr);
@@ -67,6 +66,10 @@ int my_ftp(char *port_str, char *path)
 
     if (!ftp || (port = verif_port(port_str)) == -1)
         return (84);
+    if (chdir(path) == -1) {
+        perror("");
+        return (84);
+    }
     init_ftp(ftp, port, path);
     server_start(ftp);
     return (0);
