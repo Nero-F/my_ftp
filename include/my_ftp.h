@@ -102,6 +102,10 @@ void pasv_f(ftp_t *ftp, char *arg, client_list_t *client);
 void port_f(ftp_t *ftp, char *arg, client_list_t *client);
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client);
 void stor_f(ftp_t *ftp, char *arg, client_list_t *client);
+void dele_f(ftp_t *ftp, char *arg, client_list_t *client);
+void cdup_f(ftp_t *ftp, char *arg, client_list_t *client);
+void pwd_f(ftp_t *ftp, char *arg, client_list_t *client);
+void cwd_f(ftp_t *ftp, char *arg, client_list_t *client);
 
 /* client gestion */
 
