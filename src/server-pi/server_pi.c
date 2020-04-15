@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include "my_ftp.h"
-#include <errno.h>
 
 const ftp_cmd_t ftp_cmd[] = {
     {"NOOP", NO_ARGUMENT, 200},
@@ -21,9 +20,10 @@ const ftp_cmd_t ftp_cmd[] = {
     {"QUIT", NO_ARGUMENT, 221},
     {"PASV", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
     {"LIST", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
-    {"STOR", REQUIRED_ARGUMENT, 150}, // and 226
     {"RETR", REQUIRED_ARGUMENT, 214}, 
+    {"STOR", REQUIRED_ARGUMENT, 150}, // and 226
     {"HELP", OPTIONAL_ARGUMENT, 214}, 
+    {"PWD", NO_ARGUMENT, 257}, 
 };
 
 const return_obj_t object_ret[] = {
@@ -42,128 +42,46 @@ const return_obj_t object_ret[] = {
     {332, "Need account for login."},
 };
 
-void noop_f(char *cmd, char *arg, client_list_t *client)
+void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    dprintf(client->fd, "%s%s", cmd, object_ret[3]);
+    dprintf(client->fd, "200 NOOP okay.\n");
 }
 
-void cdup_f(char *cmd, char *arg, client_list_t *client)
+void cdup_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    dprintf(client->fd, "%s%s", cmd, object_ret[3]);
+    dprintf(client->fd, "200 CDUP okay.\n");
 }
 
-void port_f(char *cmd, char *arg, client_list_t *client)
-{
-    dprintf(client->fd, "%s%s", cmd, object_ret[3]);
-}
-
-void user_f(char *cmd, char *arg, client_list_t *client)
-{
-    printf("--> %s\n", arg);
-    if (arg == NULL) {
-        dprintf(client->fd, "530 Permission denied.\n");
-        return;
-    }
-    if (client->has_auth & 3) {
-        dprintf(client->fd, "530 Can't change from guest user.\n");
-        return;
-    }
-    if (strcmp(arg, "Anonymous") == 0) { // Todo: CHecker si on il y'a plus qu'Anonymous
-        client->has_auth |= (1 << 1) | (1 << 5);
-        printf("HERE-----\n");
-    } else
-        client->has_auth |= (1 << 5);
-    dprintf(client->fd, "331 Please specify the password.\n");
-}
-
-void pass_f(char *cmd, char *arg, client_list_t *client)
-{
-    if (!client->has_auth & 5)
-        dprintf(client->fd, "530 Login with USER first.\n");
-    else if (!arg)
-        client->has_auth |= (1 << 3);
-    if (client->has_auth == 42) {
-        dprintf(client->fd, "230 Login successful.\n");
-        client->is_connected = TRUE;
-    } else {
-        dprintf(client->fd, "530 Login incorrect.\n");
-        client->has_auth ^= client->has_auth;
-    }
-}
-void cwd_f(char *cmd, char *arg, client_list_t *client)
+void cwd_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
 }
-void dele_f(char *cmd, char *arg, client_list_t *client)
+void dele_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
 }
-void quit_f(char *cmd, char *arg, client_list_t *client)
+void quit_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     dprintf(client->fd, "221 Goodbye.\n");
     client->has_auth |= (1 << 6);
 }
 
-char *disp_port(uint32_t port)
-{
-
-    printf("==++> %d\n", port);
-    return ("EFZEF");
-}
-
-void pasv_f(char *cmd, char *arg, client_list_t *client)
-{
-    client->data_sock = malloc(sizeof(socket_t));
-    if (!client->data_sock) {
-        fprintf(stderr, "malloc() -> PASV");
-        return;
-    }
-    client->data_sock->socket = socket(AF_INET, SOCK_STREAM, 0); 
-    if (client->data_sock->socket == -1) {
-        fprintf(stderr, "socket() -> PASV", strerror(errno));
-        return;
-    }
-    client->data_sock->cli_addr.sin_addr.s_addr = INADDR_ANY;
-    client->data_sock->cli_addr.sin_family = AF_INET;
-    client->data_sock->cli_addr.sin_port = 0; // supposely bind any availiable port
-    client->data_sock->addr_len = sizeof(client->data_sock->cli_addr);
-    if (bind(client->fd, (struct sockaddr *)&client->data_sock, \
-        client->data_sock->addr_len) == -1) {
-        fprintf(stderr, "bind() -> PASV", strerror(errno));
-        return;
-    }
-    dprintf(client->fd, "227 Entering Passive Mode %s.\n", disp_port(client->data_sock->cli_addr.sin_port));
-}
-void list_f(char *cmd, char *arg, client_list_t *client)
-{
-}
-void ret_f(char *cmd, char *arg, client_list_t *client)
-{
-}
-void help_f(char *cmd, char *arg, client_list_t *client)
+void list_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
 }
 
-void pwd_f(char *cmd, char *arg, client_list_t *client)
+void help_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
+}
+
+void pwd_f(ftp_t *ftp, char *arg, client_list_t *client)
+{
+    printf("here\n");
     dprintf(client->fd, "257 \"%s\"", client->path_dist);
 }
 
-void disconnect_client(int fd, fd_set *rfds, client_list_t **list, int *connexion)
-{
-    close(fd);
-    FD_CLR(fd, rfds);
-    rm_at_filedesc(list,fd);
-    --(*connexion);
-}
-
-void protocole_interpreter(ftp_t *ftp, int fd)
+static void protocole_interpreter(ftp_t *ftp, int fd, \
+void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 {
     client_list_t *client = get_node_at_filedesc(&ftp->cli_list, fd);
-    void (*fct_ptr[13])(char *, char *, client_list_t *) = { // TODO: deplacer ça dans init_struct
-        &noop_f, &cdup_f, port_f, \
-        &user_f, &pass_f, cwd_f, \
-        &dele_f, &quit_f, &pasv_f, \
-        &list_f, &ret_f, &help_f, &pwd_f
-    };
     int i = 0;
     char *cmd = strtok(ftp->buffer, " ");
     if (!client || !cmd)
@@ -172,46 +90,23 @@ void protocole_interpreter(ftp_t *ftp, int fd)
         strcmp(cmd, "USER") != 0 && strcmp(cmd, "PASS") != 0) { // check if the user is connected or not
         dprintf(client->fd, "530 Please login with USER and PASS\n");
     } else {
-        while (i != 12) {
+        while (i < 14) {
             if (strcmp(cmd, ftp_cmd[i].cmd) == 0) {
-                fct_ptr[i](ftp_cmd[i].cmd, strtok(NULL, " "), client);
+                printf("here\n");
+                printf("yoyoy %s\n", ftp_cmd[i].cmd);
+                fct_ptr[i](ftp, strtok(NULL, " "), client);
                 break;
             }
             i++;
         }
-        if (client->has_auth == NO_AUTH_DISCONNECT ||
-            client->has_auth == WRONG_USER_DISCONNECT ||
-            client->has_auth == WRIGHT_USER_DISCONNECT ||
-            client->has_auth == POST_AUTH_DISCONNECT) {
-            disconnect_client(client->fd, &ftp->rfds, &ftp->cli_list, &ftp->connexion);
-        }
+        check_disconnect(ftp, client);
     }
     printf("connextion %d\n", ftp->connexion);
     dump_list(ftp->cli_list);
 }
 
-int new_clients(ftp_t *ftp)
-{
-    printf("someone's trying to connect\n");
-    if ((ftp->clients.socket = accept(ftp->server.socket, \
-        (struct sockaddr *)&ftp->clients.cli_addr, \
-        &ftp->clients.addr_len)) == -1) {
-        perror("");
-        return (84);
-    }
-    if (ftp->connexion == MAX_CLIENT) {
-        dprintf(ftp->clients.socket, "Occupied.\n");
-        return (0);
-    }
-    ftp->connexion++;
-    add_node(&ftp->cli_list, ftp->clients.socket, ftp->path, ftp->port);
-    dprintf(ftp->clients.socket, "220\n");
-    FD_SET(ftp->clients.socket, &ftp->rfds);
-    return (0);
-}
-
-
-static int clients_connexion(int i, ftp_t *ftp)
+static int clients_connexion(int i, ftp_t *ftp, \
+void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 {
     if (i == ftp->server.socket) {
         if (new_clients(ftp) != 0)
@@ -224,14 +119,17 @@ static int clients_connexion(int i, ftp_t *ftp)
             return (0);
         }
         printf("socket number #%d said: %s\n", i, ftp->buffer);
-        protocole_interpreter(ftp, i);
+        protocole_interpreter(ftp, i, fct_ptr);
         free(ftp->buffer);
     }
 }
 
 int server_pi(ftp_t *ftp)
 {
-    int nfds = 0;
+    void (*fct_ptr[13])(ftp_t *, char *, client_list_t *) = { // TODO: deplacer ça dans init_struct
+        &noop_f, &cdup_f, &port_f, &user_f, &pass_f, cwd_f, \
+        &dele_f, &quit_f, &pasv_f, &list_f, &retr_f, &help_f, &pwd_f
+    };
 
     FD_ZERO(&ftp->rfds);
     FD_SET(ftp->server.socket, &ftp->rfds);
@@ -242,10 +140,10 @@ int server_pi(ftp_t *ftp)
             break;
         }
         for (int i = 0; i < FD_SETSIZE; ++i) {
-            if (FD_ISSET(i, &ftp->afds) && clients_connexion(i, ftp) == 84)
+            if (FD_ISSET(i, &ftp->afds) && \
+                clients_connexion(i, ftp, fct_ptr) == 84)
                 return (84);
         }
     }
-    close(ftp->server.socket);
     return (0);
 }

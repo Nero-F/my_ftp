@@ -32,6 +32,7 @@ static int server_start(ftp_t *ftp) // listens all the connextions on the given 
 {
     ftp->server.socket = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in *addr = malloc(sizeof(struct sockaddr_in));
+    int ret = 0;
     
     if (ftp->server.socket == -1 || !addr || \
         socket_assignation(addr, ftp->server.socket, ftp->port) != 0 || \
@@ -40,8 +41,9 @@ static int server_start(ftp_t *ftp) // listens all the connextions on the given 
         return (84);
     }
     printf("--> %d\n", ftp->port);
-    server_pi(ftp);
-    return (0);
+    ret = server_pi(ftp);
+    close(ftp->server.socket);
+    return (ret);
 }
 
 static void init_ftp(ftp_t *ftp, int port, char *path)
@@ -52,8 +54,8 @@ static void init_ftp(ftp_t *ftp, int port, char *path)
     ftp->path = path;
 
     ftp->clients.socket = 0;
-    ftp->clients.addr_len = sizeof(ftp->clients.cli_addr);
-    memset(&ftp->clients.cli_addr, 0, ftp->clients.addr_len);
+    ftp->clients.addr_len = sizeof(ftp->clients.addr);
+    memset(&ftp->clients.addr, 0, ftp->clients.addr_len);
     ftp->cli_list = NULL;
     ftp->connexion = 0;
 }

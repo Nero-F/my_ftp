@@ -2,6 +2,7 @@
 #define MY_FTP_H_
 
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,16 +47,18 @@ typedef struct ftp_cmd_s
 
 typedef struct socket_s
 {
-    struct sockaddr_in cli_addr;
+    struct sockaddr_in addr;
     socklen_t addr_len;
     int socket;
 } socket_t;
 
 typedef struct client_list_s
 {
-    int fd;
+    int fd; // control socket
     socket_t *data_sock;
     bool_t is_connected;
+    bool_t can_transfer;
+    bool_t in_use;
     unsigned int has_auth;
     char *path_dist;
     int port;
@@ -70,10 +73,12 @@ typedef struct fpt_s
     char *path;
     char *buffer;
     fd_set rfds;
+    fd_set wfds;
     fd_set afds;
     socket_t server;
     socket_t clients;
     socket_t data_sock;
+    ftp_cmd_t *cmd;
     client_list_t *cli_list;
 } ftp_t;
 
@@ -88,5 +93,20 @@ void rm_at_filedesc(client_list_t **head, int fd);
 void dump_list(client_list_t *head);
 void free_list(client_list_t **head);
 client_list_t *get_node_at_filedesc(client_list_t **head, int fd);
+
+/* ftp commands */
+
+void user_f(ftp_t *ftp, char *arg, client_list_t *client);
+void pass_f(ftp_t *ftp, char *arg, client_list_t *client);
+void pasv_f(ftp_t *ftp, char *arg, client_list_t *client);
+void port_f(ftp_t *ftp, char *arg, client_list_t *client);
+void retr_f(ftp_t *ftp, char *arg, client_list_t *client);
+
+/* client gestion */
+
+int new_clients(ftp_t *ftp);
+void disconnect_client(int fd, fd_set *rfds, client_list_t **list, \
+int *connexion);
+void check_disconnect(ftp_t *ftp, client_list_t *client);
 
 #endif /* MY_FTP_H_*/

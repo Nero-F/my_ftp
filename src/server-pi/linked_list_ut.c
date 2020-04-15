@@ -12,10 +12,12 @@ void init_client_node(client_list_t *node, int fd, char *path, int port)
     node->fd = fd;
     node->is_connected = FALSE;
     node->has_auth = 0;
-    node->path_dist = path;
+    node->path_dist = strdup(path);
     node->nxt = NULL;
     node->data_sock = NULL;
     node->port = port;
+    node->can_transfer = FALSE;
+    node->in_use = FALSE;
 }
 
 int add_node(client_list_t **head, int fd, char *path, int port)
