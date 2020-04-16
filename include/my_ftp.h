@@ -83,8 +83,9 @@ typedef struct fpt_s
 } ftp_t;
 
 char *get_next_line(int fd);
+char **my_str_to_word_array(char *str, char sep);
 int my_ftp(char *port_str, char *path);
-int verif_port(char *port);
+int verif_nb(char *nb, char *elem);
 int server_pi(ftp_t *ftp);
 
 /* linked list */

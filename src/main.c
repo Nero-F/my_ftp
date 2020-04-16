@@ -12,19 +12,19 @@ static void display_help(void)
     " \e[3Anonymous\e[0 user\n");
 }
 
-int verif_port(char *port)
+int verif_nb(char *nb, char *elem)
 {
-    size_t len = strlen(port);
+    size_t len = strlen(nb);
     size_t i = 0;
 
     while (i != len) {
-        if (isdigit(port[i]) == 0) {
-            fprintf(stderr, "Port is not a number\n");
+        if (isdigit(nb[i]) == 0) {
+            fprintf(stderr, "%s is not a number\n", elem);
             return (-1);
         }
         ++i;
     }
-    return (atoi(port));
+    return (atoi(nb));
 }
 
 int main(int ac, char *av[])

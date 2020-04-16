@@ -8,6 +8,7 @@ RM		=		rm -rf
 
 SRC		=		src/main.c			\
 				src/get_next_line.c	\
+				src/my_str_to_word_array.c	\
 				src/my_ftp.c	\
 				src/server-pi/client_connexion.c	\
 				src/server-pi/linked_list_ut.c	\

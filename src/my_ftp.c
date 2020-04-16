@@ -64,7 +64,7 @@ int my_ftp(char *port_str, char *path)
     ftp_t *ftp = malloc(sizeof(ftp_t));
     int port = 0; 
 
-    if (!ftp || (port = verif_port(port_str)) == -1)
+    if (!ftp || (port = verif_nb(port_str, "Port")) == -1)
         return (84);
     if (chdir(path) == -1) {
         perror("");
