@@ -15,6 +15,7 @@
 #define WRIGHT_USER_DISCONNECT      0x62
 #define POST_AUTH_DISCONNECT        0x6a
 
+#define BUFFER_SIZE 1024 
 
 #define OPTIONAL_ARGUMENT   2
 #define REQUIRED_ARGUMENT   1
@@ -41,6 +42,7 @@ typedef enum bool_e
 typedef struct ftp_cmd_s
 {
     char *cmd;
+    char *cmd_p;
     bool_t has_argument;
     REPLY_CODE code;
 } ftp_cmd_t; 
@@ -104,6 +106,7 @@ void port_f(ftp_t *ftp, char *arg, client_list_t *client);
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client);
 void stor_f(ftp_t *ftp, char *arg, client_list_t *client);
 void dele_f(ftp_t *ftp, char *arg, client_list_t *client);
+void list_f(ftp_t *ftp, char *arg, client_list_t *client);
 void cdup_f(ftp_t *ftp, char *arg, client_list_t *client);
 void pwd_f(ftp_t *ftp, char *arg, client_list_t *client);
 void cwd_f(ftp_t *ftp, char *arg, client_list_t *client);
@@ -114,5 +117,6 @@ int new_clients(ftp_t *ftp);
 void disconnect_client(int fd, fd_set *rfds, client_list_t **list, \
 int *connexion);
 void check_disconnect(ftp_t *ftp, client_list_t *client);
+int accept_data_sock(int fd, socket_t *data_sock);
 
 #endif /* MY_FTP_H_*/

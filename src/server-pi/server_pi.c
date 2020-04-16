@@ -10,20 +10,20 @@
 #include "my_ftp.h"
 
 const ftp_cmd_t ftp_cmd[] = {
-    {"NOOP", NO_ARGUMENT, 200},
-    {"CDUP", NO_ARGUMENT, 200},
-    {"PORT", NO_ARGUMENT, 200},
-    {"USER", REQUIRED_ARGUMENT, 331},
-    {"PASS", REQUIRED_ARGUMENT, 332},
-    {"CWD", REQUIRED_ARGUMENT, 250},
-    {"DELE", REQUIRED_ARGUMENT, 250},
-    {"QUIT", NO_ARGUMENT, 221},
-    {"PASV", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
-    {"LIST", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
-    {"RETR", REQUIRED_ARGUMENT, 214}, 
-    {"STOR", REQUIRED_ARGUMENT, 150}, // and 226
-    {"HELP", OPTIONAL_ARGUMENT, 214}, 
-    {"PWD", NO_ARGUMENT, 257}, 
+    {"NOOP", "NOOP\r\n", NO_ARGUMENT, 200},
+    {"CDUP", "CDUP\r\n", NO_ARGUMENT, 200},
+    {"PORT", "PORT\r\n", NO_ARGUMENT, 200},
+    {"USER", "USER\r\n", REQUIRED_ARGUMENT, 331},
+    {"PASS", "PASS\r\n", REQUIRED_ARGUMENT, 332},
+    {"CWD", "CWD\r\n", REQUIRED_ARGUMENT, 250},
+    {"DELE", "DELE\r\n", REQUIRED_ARGUMENT, 250},
+    {"QUIT", "QUIT\r\n", NO_ARGUMENT, 221},
+    {"PASV", "PASV\r\n", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
+    {"LIST", "LIST\r\n", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
+    {"RETR", "RETR\r\n", REQUIRED_ARGUMENT, 214}, 
+    {"STOR", "STOR\r\n", REQUIRED_ARGUMENT, 150}, // and 226
+    {"HELP", "HELP\r\n", OPTIONAL_ARGUMENT, 214}, 
+    {"PWD", "PWD\r\n", NO_ARGUMENT, 257}, 
 };
 
 const return_obj_t object_ret[] = {
@@ -44,6 +44,7 @@ const return_obj_t object_ret[] = {
 
 void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
+    printf("[%s]\n", arg);
     dprintf(client->fd, "200 NOOP okay.\n");
 }
 
@@ -53,12 +54,22 @@ void quit_f(ftp_t *ftp, char *arg, client_list_t *client)
     client->has_auth |= (1 << 6);
 }
 
-void list_f(ftp_t *ftp, char *arg, client_list_t *client)
-{
-}
-
 void help_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
+    dprintf(client->fd, "214 LOL.\n");
+}
+
+static char *parse_cmd(char *cmd)
+{
+    int i = 0;
+
+    printf("[%s]\n", cmd);
+    while (cmd[i] != '\0') {
+        if (cmd[i] != ' ')
+            return (strtok(cmd, " "));
+        ++i;
+    }
+    return (strdup("BAD CMD\n"));
 }
 
 static void protocole_interpreter(ftp_t *ftp, int fd, \
@@ -66,7 +77,8 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 {
     client_list_t *client = get_node_at_filedesc(&ftp->cli_list, fd);
     int i = 0;
-    char *cmd = strtok(ftp->buffer, " ");
+    
+    char *cmd = parse_cmd(ftp->buffer);
     if (!client || !cmd)
         return;
     if (client->is_connected == FALSE && strcmp(cmd, "QUIT") != 0 && \
@@ -74,14 +86,15 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
         dprintf(client->fd, "530 Please login with USER and PASS\n");
     } else {
         while (i < 14) {
-            if (strcmp(cmd, ftp_cmd[i].cmd) == 0) {
-                printf("here\n");
-                printf("yoyoy %s\n", ftp_cmd[i].cmd);
+            if (strcmp(cmd, ftp_cmd[i].cmd) == 0 || \
+                strcmp(cmd, ftp_cmd[i].cmd_p) == 0) {
+                printf("COMMAND %s\n", ftp_cmd[i].cmd);
                 fct_ptr[i](ftp, strtok(NULL, " "), client);
                 break;
             }
             i++;
         }
+        i == 14 ? dprintf(client->fd, "500 Unknown command.\n") : 0;
         check_disconnect(ftp, client);
     }
     printf("connextion %d\n", ftp->connexion);

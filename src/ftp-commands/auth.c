@@ -30,7 +30,8 @@ void pass_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     if (!client->has_auth & 5)
         dprintf(client->fd, "530 Login with USER first.\n");
-    else if (!arg || (arg && strcmp(arg, "\r") == 0)) {
+    else if (!arg || \
+            (arg && strcmp(arg, "\r") == 0) || (arg && strcmp(arg, "\r\n") == 0)) {
         client->has_auth |= (1 << 3);
     }
     if (client->has_auth == 42) {
