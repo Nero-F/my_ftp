@@ -97,7 +97,6 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
     } else {
         ftp->buffer = get_next_line(i);
         if (ftp->buffer == NULL) {
-            printf("####pre disco\n");
             disconnect_client(i, &ftp->rfds, &ftp->cli_list, &ftp->connexion);
             return (0);
         }

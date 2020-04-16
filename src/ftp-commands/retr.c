@@ -24,49 +24,45 @@ static void retrieve(int data_sock, char *path, client_list_t *client)
 
     if (fd == -1 || fstat(fd, &statbuf) == -1) {
         dprintf(client->fd, "550 failed to open file.\n");
+        perror("");
         close(fd);
+        return;
+    }
+    dprintf(client->fd, "150 File status okay;\n");
+                        // "about to open data connection\r\n");
+    int fdf = accept(data_sock, (struct sockaddr *)&client->data_sock->addr, &client->data_sock->addr_len);
+    if (fdf == -1) {
+        perror("");
         return;
     }
     pid = fork();
     if (pid == -1) {
-        printf("oupsi\n");
         return;
     } else if (pid == 0) {
-        printf("children\n");
-        if (sendfile(data_sock, fd, &offset, statbuf.st_size) == -1) {
-            perror("sendfile() -> retrieve()");
-            close(fd);
-            return;
+        while ((ret_read = read(fd, buffer, BUFFER_SIZE)) != 0) {
+            write(fdf, buffer, ret_read);
         }
-        // client->in_use = TRUE;
-        // while ((ret_read = read(fd, buffer, BUFFER_SIZE)) > 0) {
-        //     write(data_sock, buffer, BUFFER_SIZE);
-        // }
-        shutdown(data_sock, SHUT_WR);
-    } else {
-        printf("buffer ====++> %s\n", buffer);
-        dprintf(client->fd, buffer);
-        dprintf(client->fd, "File send successfully");
+        dprintf(client->fd, "226 Closing data connection\n");
+        shutdown(fd, SHUT_WR);
         close(fd);
+        close(data_sock);
+    } else {
+        printf("parent\n");
     }
 }
 
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     int fd = client->data_sock->socket;
-    printf("ahaha\n");
+
     if (client->can_transfer == FALSE) {
         dprintf(client->fd, "425 Use PORT or PASV first.\n");
-        printf("sfefzef\n");
     } else {
-        // fd = accept(client->data_sock->socket, \
-        (struct sockaddr *)&client->data_sock->addr, &client->data_sock->addr_len);
         if (fd == -1) {
             printf("pas ouf\n");
             dprintf(client->fd, "425 problem with connection.\n");
             return;
         }
-        printf("hohoho\n");
         retrieve(fd, arg, client);
     }
 }
