@@ -51,7 +51,7 @@ static void init_data_socket(socket_t *data_sock, int port)
 {
     data_sock->addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     data_sock->addr.sin_family = AF_INET;
-    data_sock->addr.sin_port = htons(port); // supposely bind any availiable port
+    data_sock->addr.sin_port = htons(port);
     data_sock->addr_len = sizeof(data_sock->addr);
 
     if (bind(data_sock->socket, \

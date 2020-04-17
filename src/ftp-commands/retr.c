@@ -45,16 +45,17 @@ static void retrieve(int data_sock, char *path, client_list_t *client)
     int fd = verif_file(path, data_sock, client);
     int fdf = 0;
 
-    pid = fork();
-    if (fd == 84 || (fdf = accept_data_sock(fd, client->data_sock)) || \
-        (pid = fork())== -1)
+    if (fd == 84 || (fdf = accept_data_sock(fd, client->data_sock)) == 84)
         return;
-    else if (pid == 0) {
+    if ((pid = fork()) == -1) {
+        close(fd);
+        perror("");
+        return;
+    } else if (pid == 0) {
         while ((ret_read = read(fd, buffer, BUFFER_SIZE)) != 0) {
             write(fdf, buffer, ret_read);
         }
         dprintf(client->fd, "226 Closing data connection\n");
-        shutdown(fd, SHUT_WR);
         close(fd);
         close(data_sock);
     } else
