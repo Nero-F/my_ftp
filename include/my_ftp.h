@@ -43,6 +43,7 @@ typedef struct ftp_cmd_s
 {
     char *cmd;
     char *cmd_p;
+    char *cmd_rf;
     bool_t has_argument;
     REPLY_CODE code;
 } ftp_cmd_t; 

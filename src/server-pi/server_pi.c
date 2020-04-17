@@ -10,20 +10,20 @@
 #include "my_ftp.h"
 
 const ftp_cmd_t ftp_cmd[] = {
-    {"NOOP", "NOOP\r\n", NO_ARGUMENT, 200},
-    {"CDUP", "CDUP\r\n", NO_ARGUMENT, 200},
-    {"PORT", "PORT\r\n", NO_ARGUMENT, 200},
-    {"USER", "USER\r\n", REQUIRED_ARGUMENT, 331},
-    {"PASS", "PASS\r\n", REQUIRED_ARGUMENT, 332},
-    {"CWD", "CWD\r\n", REQUIRED_ARGUMENT, 250},
-    {"DELE", "DELE\r\n", REQUIRED_ARGUMENT, 250},
-    {"QUIT", "QUIT\r\n", NO_ARGUMENT, 221},
-    {"PASV", "PASV\r\n", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
-    {"LIST", "LIST\r\n", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
-    {"RETR", "RETR\r\n", REQUIRED_ARGUMENT, 214}, 
-    {"STOR", "STOR\r\n", REQUIRED_ARGUMENT, 150}, // and 226
-    {"HELP", "HELP\r\n", OPTIONAL_ARGUMENT, 214}, 
-    {"PWD", "PWD\r\n", NO_ARGUMENT, 257}, 
+    {"NOOP", "NOOP\n", "NOOP\r\n", NO_ARGUMENT, 200},
+    {"CDUP", "CDUP\n", "CDUP\r\n", NO_ARGUMENT, 200},
+    {"PORT", "PORT\n", "PORT\r\n", NO_ARGUMENT, 200},
+    {"USER", "USER\n", "USER\r\n", REQUIRED_ARGUMENT, 331},
+    {"PASS", "PASS\n", "PASS\r\n", REQUIRED_ARGUMENT, 332},
+    {"CWD", "CWD\n", "CWD\r\n", REQUIRED_ARGUMENT, 250},
+    {"DELE", "DELE\n", "DELE\r\n", REQUIRED_ARGUMENT, 250},
+    {"QUIT", "QUIT\n", "QUIT\r\n", NO_ARGUMENT, 221},
+    {"PASV", "PASV\n", "PASV\r\n", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
+    {"LIST", "LIST\n", "LIST\r\n", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
+    {"RETR", "RETR\n", "RETR\r\n", REQUIRED_ARGUMENT, 214}, 
+    {"STOR", "STOR\n", "STOR\r\n", REQUIRED_ARGUMENT, 150}, // and 226
+    {"HELP", "HELP\n", "HELP\r\n", OPTIONAL_ARGUMENT, 214}, 
+    {"PWD", "PWD\n", "PWD\r\n", NO_ARGUMENT, 257}, 
 };
 
 const return_obj_t object_ret[] = {
@@ -63,10 +63,10 @@ static char *parse_cmd(char *cmd)
 {
     int i = 0;
 
-    printf("[%s]\n", cmd);
+    printf("####[%s]\n", cmd);
     while (cmd[i] != '\0') {
         if (cmd[i] != ' ')
-            return (strtok(cmd, " "));
+            return (cmd);
         ++i;
     }
     return (strdup("BAD CMD\n"));
@@ -77,8 +77,12 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 {
     client_list_t *client = get_node_at_filedesc(&ftp->cli_list, fd);
     int i = 0;
-    
-    char *cmd = parse_cmd(ftp->buffer);
+    char *tmp;
+    char **cmd_p = my_str_to_word_array(ftp->buffer, ' ');
+
+    if(!cmd_p)
+        return;
+    char *cmd = parse_cmd(cmd_p[0]);
     if (!client || !cmd)
         return;
     if (client->is_connected == FALSE && strcmp(cmd, "QUIT") != 0 && \
@@ -86,10 +90,13 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
         dprintf(client->fd, "530 Please login with USER and PASS\n");
     } else {
         while (i < 14) {
-            if (strcmp(cmd, ftp_cmd[i].cmd) == 0 || \
-                strcmp(cmd, ftp_cmd[i].cmd_p) == 0) {
-                printf("COMMAND %s\n", ftp_cmd[i].cmd);
-                fct_ptr[i](ftp, strtok(NULL, " "), client);
+            if ((tmp = strstr(cmd, "\r")) != NULL || \
+                (tmp = strstr(cmd, "\r\n")) != NULL || \
+                (tmp = strstr(cmd, "\n")) != NULL ) {
+                *tmp = '\0';
+            }
+            if (strcmp(cmd, ftp_cmd[i].cmd) == 0) {
+                fct_ptr[i](ftp, cmd_p[1], client);
                 break;
             }
             i++;
