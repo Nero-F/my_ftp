@@ -40,7 +40,7 @@ void cdup_f(ftp_t *ftp, char *arg, client_list_t *client)
         return;
     }
     client->path_dist = path;
-    dprintf(client->fd, "250 Directory successfully changed.\n");
+    dprintf(client->fd, "200 Directory successfully changed.\n");
 }
 
 static char *get_rpath(char *arg, char *path_dist, DIR *dirp, int fd)

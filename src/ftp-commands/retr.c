@@ -15,6 +15,7 @@ int accept_data_sock(int fd, socket_t *data_sock)
 {
     int fdf = accept(data_sock->socket, (struct sockaddr *)&data_sock->addr, \
                     &data_sock->addr_len);
+
     if (fdf == -1) {
         perror("");
         close(fd);
