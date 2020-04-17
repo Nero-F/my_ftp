@@ -21,10 +21,10 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client)
     }
     if (pid == 0) {
         while ((ret_read = fread(buffer, sizeof(char), BUFFER_SIZE, fp)) > 0) {
-            fwrite(buffer, sizeof(char), ret_read, fp);
+            write(fdf, buffer, ret_read);
         }
-    } else {
         fclose(fp);
+        close(fdf);
+    } else {
     }
-    fclose(fp);
 }

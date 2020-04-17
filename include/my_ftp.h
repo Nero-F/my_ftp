@@ -74,6 +74,7 @@ typedef struct fpt_s
     int port;
     char *path;
     char *buffer;
+    char *local_ip;
     fd_set rfds;
     fd_set wfds;
     fd_set afds;

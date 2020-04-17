@@ -64,11 +64,12 @@ static void retrieve(int data_sock, char *path, client_list_t *client)
 
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    int fd = client->data_sock->socket;
+    int fd = 0;
 
     if (client->can_transfer == FALSE) {
         dprintf(client->fd, "425 Use PORT or PASV first.\n");
     } else {
+        fd = client->data_sock->socket;
         if (fd == -1) {
             printf("pas ouf\n");
             dprintf(client->fd, "425 problem with connection.\n");
