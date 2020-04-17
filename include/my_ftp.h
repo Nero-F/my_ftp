@@ -90,6 +90,7 @@ char **my_str_to_word_array(char *str, char sep);
 int my_ftp(char *port_str, char *path);
 int verif_nb(char *nb, char *elem);
 int server_pi(ftp_t *ftp);
+void get_local_ip(ftp_t *ftp);
 
 /* linked list */
 int add_node(client_list_t **head, int fd, char *path, int port);

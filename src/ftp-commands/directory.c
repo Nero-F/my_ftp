@@ -46,10 +46,11 @@ void cdup_f(ftp_t *ftp, char *arg, client_list_t *client)
 static char *get_rpath(char *arg, char *path_dist, DIR *dirp, int fd)
 {
     char *path = NULL;
-    char *buffer = copy_to_buff(arg, path_dist);
+    char *buffer = arg[0] == '/' ? arg : copy_to_buff(arg, path_dist);
 
     if (!buffer)
         return (NULL);
+    printf("buffer --> %s\n", buffer);
     if ((dirp = opendir(buffer)) == NULL) {
         perror("");
         dprintf(fd, "550 Failed to change directory\n");
@@ -57,7 +58,7 @@ static char *get_rpath(char *arg, char *path_dist, DIR *dirp, int fd)
         return (NULL);
     }
     path = realpath(buffer, NULL);
-    free(buffer);
+    buffer == arg ? 0 : free(buffer);
     if (!path) {
         perror("realpath() -> cdup()");
         return (NULL);

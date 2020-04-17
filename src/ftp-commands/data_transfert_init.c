@@ -96,7 +96,6 @@ void port_f(ftp_t *ftp, char *arg, client_list_t *client)
     }
 }
 
-
 void get_local_ip(ftp_t *ftp)
 {
     int socketfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -123,7 +122,6 @@ void get_local_ip(ftp_t *ftp)
 
 void pasv_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    get_local_ip(ftp);
     client->data_sock = setup_data_socket();
     if (!client->data_sock)
         return;

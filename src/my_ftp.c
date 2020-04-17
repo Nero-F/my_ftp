@@ -49,7 +49,7 @@ static int server_start(ftp_t *ftp) // listens all the connextions on the given 
 static void init_ftp(ftp_t *ftp, int port, char *path)
 {
     ftp->buffer = NULL;
-
+    get_local_ip(ftp);
     ftp->port = port;
     ftp->path = realpath(path, NULL);
     ftp->clients.socket = 0;
