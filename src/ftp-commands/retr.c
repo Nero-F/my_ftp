@@ -58,8 +58,8 @@ static void retrieve(int data_sock, char *path, client_list_t *client)
         dprintf(client->fd, "226 Closing data connection\n");
         close(fd);
         close(data_sock);
-    } else
-        printf("parent\n");
+        client->can_transfer = FALSE;
+    }
 }
 
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client)
