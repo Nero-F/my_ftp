@@ -15,10 +15,13 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client)
     pid_t pid = 0;
     int fdf = 0;
 
-    if (!fp || (fdf = accept(client->data_sock->socket, (struct sockaddr *)&client->data_sock->addr, &client->data_sock->addr_len)) == -1) {
+    if (!fp || (fdf = accept(client->data_sock->socket, \
+                (struct sockaddr *)&client->data_sock->addr, \
+                &client->data_sock->addr_len)) == -1) {
         perror("");
         return;
     }
+    dprintf(client->fd, "150 File status okay;\n");
     if ((pid = fork()) == -1) {
         perror("");
         return;
@@ -28,6 +31,6 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client)
         }
         fclose(fp);
         // close(fdf);
-    } else {
+        dprintf(client->fd, "226 Closing data connection\n");
     }
 }

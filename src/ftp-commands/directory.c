@@ -35,12 +35,12 @@ void cdup_f(ftp_t *ftp, char *arg, client_list_t *client)
     if (!buffer)
         return;
     path = realpath(buffer, NULL);
-    if (!path) {
-        perror("realpath() -> cdup()");
+    if (!path || chdir(path) == -1 ) {
+        perror("realpath()  or chdir() -> cdup()");
         return;
     }
     client->path_dist = path;
-    dprintf(client->fd, "200 Directory successfully changed.\n");
+    dprintf(client->fd, "200 Directory successfully changed.\r\n");
 }
 
 static char *get_rpath(char *arg, char *path_dist, DIR *dirp, int fd)
@@ -51,9 +51,9 @@ static char *get_rpath(char *arg, char *path_dist, DIR *dirp, int fd)
     if (!buffer)
         return (NULL);
     printf("buffer --> %s\n", buffer);
-    if ((dirp = opendir(buffer)) == NULL) {
+    if ((dirp = opendir(buffer)) == NULL || chdir(path) == -1) {
         perror("");
-        dprintf(fd, "550 Failed to change directory\n");
+        dprintf(fd, "550 Failed to change directory\r\n");
         free(buffer);
         return (NULL);
     }
@@ -72,7 +72,7 @@ void cwd_f(ftp_t *ftp, char *arg, client_list_t *client)
     DIR *dirp = NULL;
 
     if  (!arg) {
-        dprintf(client->fd, "550 Failed to change directory\n");
+        dprintf(client->fd, "550 Failed to change directory\r\n");
         return;
     }
     if ((path = get_rpath(arg, client->path_dist, dirp, \
@@ -82,9 +82,19 @@ void cwd_f(ftp_t *ftp, char *arg, client_list_t *client)
     }
     client->path_dist = path;
     closedir(dirp);
-    dprintf(client->fd, "250 Directory successfully changed.\n");
+    dprintf(client->fd, "250 Directory successfully changed.\r\n");
 }
 
 void dele_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
+    if (!arg)
+        dprintf(client->fd, "501 Errors in parameters or Arguments\r\n");
+    else {
+        if (remove(arg) == -1) {
+            perror("remove() -> dele_f()");
+            dprintf(client->fd, "550 Requested action not taken. "
+                    "File not found or is not a file\r\n");
+        } else
+            dprintf(client->fd, "250 Directory successfully removed.\r\n");
+    }
 }

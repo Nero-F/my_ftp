@@ -5,10 +5,10 @@
 
 static void display_help(void)
 {
-	printf("USAGE: ./my_fpt port path\n"
-	"       port is the port number on wich the server"
+    printf("USAGE: ./my_fpt port path\n"
+    "       port is the port number on wich the server"
     " socket listents\n"
-	"       path is the path to the directory for the"
+    "       path is the path to the directory for the"
     " \e[3Anonymous\e[0 user\n");
 }
 

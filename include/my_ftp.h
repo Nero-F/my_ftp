@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2020
+** my_ftp
+** File description:
+** header file
+*/
+
 #ifndef MY_FTP_H_
 #define MY_FTP_H_
 
@@ -10,24 +17,24 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define NO_AUTH_DISCONNECT          0x40 
-#define WRONG_USER_DISCONNECT       0x60 
+#define NO_AUTH_DISCONNECT          0x40
+#define WRONG_USER_DISCONNECT       0x60
 #define WRIGHT_USER_DISCONNECT      0x62
 #define POST_AUTH_DISCONNECT        0x6a
 
-#define BUFFER_SIZE 1024 
+#define BUFFER_SIZE 1024
 
 #define OPTIONAL_ARGUMENT   2
 #define REQUIRED_ARGUMENT   1
 #define NO_ARGUMENT         0
 
-#define MAX_CLIENT          42 
+#define MAX_CLIENT          42
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 typedef unsigned short REPLY_CODE;
 
-typedef struct return_obj_s 
+typedef struct return_obj_s
 {
     REPLY_CODE code;
     char *message;
@@ -46,7 +53,7 @@ typedef struct ftp_cmd_s
     char *cmd_rf;
     bool_t has_argument;
     REPLY_CODE code;
-} ftp_cmd_t; 
+} ftp_cmd_t;
 
 typedef struct socket_s
 {
@@ -57,7 +64,7 @@ typedef struct socket_s
 
 typedef struct client_list_s
 {
-    int fd; // control socket
+    int fd;
     socket_t *data_sock;
     bool_t is_connected;
     bool_t can_transfer;
@@ -113,6 +120,10 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client);
 void cdup_f(ftp_t *ftp, char *arg, client_list_t *client);
 void pwd_f(ftp_t *ftp, char *arg, client_list_t *client);
 void cwd_f(ftp_t *ftp, char *arg, client_list_t *client);
+
+socket_t *setup_data_socket(void);
+void init_data_socket(socket_t *data_sock, int port, char *ip);
+char *disp_port(struct sockaddr_in *addr, char *ip);
 
 /* client gestion */
 

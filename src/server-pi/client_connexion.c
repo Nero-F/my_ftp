@@ -33,7 +33,7 @@ int *connexion)
 {
     close(fd);
     FD_CLR(fd, rfds);
-    rm_at_filedesc(list,fd);
+    rm_at_filedesc(list, fd);
     --(*connexion);
 }
 
@@ -43,5 +43,6 @@ void check_disconnect(ftp_t *ftp, client_list_t *client)
         client->has_auth == WRONG_USER_DISCONNECT ||
         client->has_auth == WRIGHT_USER_DISCONNECT ||
         client->has_auth == POST_AUTH_DISCONNECT)
-        disconnect_client(client->fd, &ftp->rfds, &ftp->cli_list, &ftp->connexion);
+        disconnect_client(client->fd, &ftp->rfds, &ftp->cli_list, \
+        &ftp->connexion);
 }

@@ -20,7 +20,7 @@ static bool_t check_data_sock(client_list_t *client)
 
 static int verif_file(char *path, int data_sock, client_list_t *client)
 {
-    int fd = open(path, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+    int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
 
     if (check_data_sock(client) == FALSE) {
         printf("MES couilles\n");

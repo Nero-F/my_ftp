@@ -17,6 +17,8 @@ SRC		=		src/main.c			\
 				src/ftp-commands/retr.c	\
 				src/ftp-commands/list.c	\
 				src/ftp-commands/stor.c	\
+				src/ftp-commands/passive.c	\
+				src/ftp-commands/active.c	\
 				src/ftp-commands/directory.c	\
 				src/ftp-commands/data_transfert_init.c	\
 

@@ -66,12 +66,11 @@ void retr_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     int fd = 0;
 
-    if (client->can_transfer == FALSE) {
+    if (client->can_transfer == FALSE || !client->data_sock) {
         dprintf(client->fd, "425 Use PORT or PASV first.\n");
     } else {
         fd = client->data_sock->socket;
         if (fd == -1) {
-            printf("pas ouf\n");
             dprintf(client->fd, "425 problem with connection.\n");
             return;
         }

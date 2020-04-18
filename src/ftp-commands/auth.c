@@ -2,14 +2,13 @@
 ** EPITECH PROJECT, 2020
 ** my_ftp
 ** File description:
-** auth ftp commands gestion 
+** auth ftp commands gestion
 */
 
 #include "my_ftp.h"
 
 void user_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
-    printf("--> [%s]\n", arg);
     if (arg == NULL) {
         dprintf(client->fd, "530 Permission denied.\n");
         return;
@@ -18,9 +17,8 @@ void user_f(ftp_t *ftp, char *arg, client_list_t *client)
         dprintf(client->fd, "530 Can't change from guest user.\n");
         return;
     }
-    if (strcmp(arg, "Anonymous") == 0 || strcmp(arg, "Anonymous\r\n")) { // Todo: CHecker si on il y'a plus qu'Anonymous
+    if (strcmp(arg, "Anonymous") == 0 || strcmp(arg, "Anonymous\r\n")) {
         client->has_auth |= (1 << 1) | (1 << 5);
-        printf("HERE-----\n");
     } else
         client->has_auth |= (1 << 5);
     dprintf(client->fd, "331 Please specify the password.\n");
@@ -31,7 +29,8 @@ void pass_f(ftp_t *ftp, char *arg, client_list_t *client)
     if (!client->has_auth & 5)
         dprintf(client->fd, "530 Login with USER first.\n");
     else if (!arg || \
-            (arg && strcmp(arg, "\r") == 0) || (arg && strcmp(arg, "\r\n") == 0)) {
+            (arg && strcmp(arg, "\r") == 0) || \
+            (arg && strcmp(arg, "\r\n") == 0)) {
         client->has_auth |= (1 << 3);
     }
     if (client->has_auth == 42) {

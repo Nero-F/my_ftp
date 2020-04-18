@@ -18,28 +18,12 @@ const ftp_cmd_t ftp_cmd[] = {
     {"CWD", "CWD\n", "CWD\r\n", REQUIRED_ARGUMENT, 250},
     {"DELE", "DELE\n", "DELE\r\n", REQUIRED_ARGUMENT, 250},
     {"QUIT", "QUIT\n", "QUIT\r\n", NO_ARGUMENT, 221},
-    {"PASV", "PASV\n", "PASV\r\n", NO_ARGUMENT, 227}, // missing h1,h2,h3,h4,p1,p2
-    {"LIST", "LIST\n", "LIST\r\n", OPTIONAL_ARGUMENT, 150}, // TODO: for the next three complete the message status
-    {"RETR", "RETR\n", "RETR\r\n", REQUIRED_ARGUMENT, 214}, 
-    {"STOR", "STOR\n", "STOR\r\n", REQUIRED_ARGUMENT, 150}, // and 226
-    {"HELP", "HELP\n", "HELP\r\n", OPTIONAL_ARGUMENT, 214}, 
-    {"PWD", "PWD\n", "PWD\r\n", NO_ARGUMENT, 257}, 
-};
-
-const return_obj_t object_ret[] = {
-    {120, "Servie ready in nnn minutes.\n"},
-    {125, "Data connection already open; transfert starting/\n"},
-    {150, "File status okay; about to open data connextion.\n"},
-    {200, " okay.\n"},
-    {214, ""}, // help msg
-    {220, "Servie ready for new user"},
-    {221, "Servie closing control connection.\nLogged out if appropriate.\n"},
-    {226, "Closing data connection.\n"},
-    {230, "User logged in proceed.\n"},
-    {250, "Requested file action successful.\n"},
-    {257, "Entering Passive Mode "},
-    {331, "User name okay, completed.\n"},
-    {332, "Need account for login."},
+    {"PASV", "PASV\n", "PASV\r\n", NO_ARGUMENT, 227},
+    {"LIST", "LIST\n", "LIST\r\n", OPTIONAL_ARGUMENT, 150},
+    {"RETR", "RETR\n", "RETR\r\n", REQUIRED_ARGUMENT, 214},
+    {"STOR", "STOR\n", "STOR\r\n", REQUIRED_ARGUMENT, 150},
+    {"HELP", "HELP\n", "HELP\r\n", OPTIONAL_ARGUMENT, 214},
+    {"PWD", "PWD\n", "PWD\r\n", NO_ARGUMENT, 257},
 };
 
 void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
@@ -80,13 +64,13 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
     char *tmp;
     char **cmd_p = my_str_to_word_array(ftp->buffer, ' ');
 
-    if(!cmd_p)
+    if (!cmd_p)
         return;
     char *cmd = parse_cmd(cmd_p[0]);
     if (!client || !cmd)
         return;
     if (client->is_connected == FALSE && strcmp(cmd, "QUIT") != 0 && \
-        strcmp(cmd, "USER") != 0 && strcmp(cmd, "PASS") != 0) { // check if the user is connected or not
+        strcmp(cmd, "USER") != 0 && strcmp(cmd, "PASS") != 0) {
         dprintf(client->fd, "530 Please login with USER and PASS\n");
     } else {
         while (i < 14) {
@@ -128,7 +112,7 @@ void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 
 int server_pi(ftp_t *ftp)
 {
-    void (*fct_ptr[14])(ftp_t *, char *, client_list_t *) = { // TODO: deplacer ça dans init_struct
+    void (*fct_ptr[14])(ftp_t *, char *, client_list_t *) = {
         &noop_f, &cdup_f, &port_f, &user_f, &pass_f, cwd_f, \
         &dele_f, &quit_f, &pasv_f, &list_f, &retr_f, &stor_f, &help_f, &pwd_f
     };

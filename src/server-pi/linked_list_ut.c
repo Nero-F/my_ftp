@@ -42,19 +42,19 @@ int add_node(client_list_t **head, int fd, char *path, int port)
     return (0);
 }
 
-void delete_node(client_list_t** head, client_list_t* del) 
-{ 
-    if (*head == NULL || del == NULL) 
-        return; 
-    if (*head == del) 
-        *head = del->nxt; 
-    if (del->nxt != NULL) 
-        del->nxt->prev = del->prev; 
-    if (del->prev != NULL) 
-        del->prev->nxt = del->nxt; 
-    free(del); 
+void delete_node(client_list_t **head, client_list_t *del)
+{
+    if (*head == NULL || del == NULL)
+        return;
+    if (*head == del)
+        *head = del->nxt;
+    if (del->nxt != NULL)
+        del->nxt->prev = del->prev;
+    if (del->prev != NULL)
+        del->prev->nxt = del->nxt;
+    free(del);
     del = NULL;
-} 
+}
 
 void rm_at_filedesc(client_list_t **head, int fd)
 {
@@ -73,7 +73,7 @@ void dump_list(client_list_t *head)
     client_list_t *tmp = head;
 
     while (tmp) {
-        printf("fd --> %d | ", tmp->fd);
+        printf("fd -> %d | ", tmp->fd);
         tmp = tmp->nxt;
     }
 }
