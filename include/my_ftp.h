@@ -49,8 +49,6 @@ typedef enum bool_e
 typedef struct ftp_cmd_s
 {
     char *cmd;
-    char *cmd_p;
-    char *cmd_rf;
     bool_t has_argument;
     REPLY_CODE code;
 } ftp_cmd_t;
@@ -89,7 +87,7 @@ typedef struct fpt_s
     socket_t server;
     socket_t clients;
     socket_t data_sock;
-    ftp_cmd_t *cmd;
+    char **cmd_parse;
     client_list_t *cli_list;
 } ftp_t;
 
@@ -99,6 +97,7 @@ int my_ftp(char *port_str, char *path);
 int verif_nb(char *nb, char *elem);
 int server_pi(ftp_t *ftp);
 void get_local_ip(ftp_t *ftp);
+char *copy_to_buff(char *arg, char *path_dist);
 
 /* linked list */
 int add_node(client_list_t **head, int fd, char *path, int port);

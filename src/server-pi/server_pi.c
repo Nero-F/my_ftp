@@ -10,20 +10,20 @@
 #include "my_ftp.h"
 
 const ftp_cmd_t ftp_cmd[] = {
-    {"NOOP", "NOOP\n", "NOOP\r\n", NO_ARGUMENT, 200},
-    {"CDUP", "CDUP\n", "CDUP\r\n", NO_ARGUMENT, 200},
-    {"PORT", "PORT\n", "PORT\r\n", NO_ARGUMENT, 200},
-    {"USER", "USER\n", "USER\r\n", REQUIRED_ARGUMENT, 331},
-    {"PASS", "PASS\n", "PASS\r\n", REQUIRED_ARGUMENT, 332},
-    {"CWD", "CWD\n", "CWD\r\n", REQUIRED_ARGUMENT, 250},
-    {"DELE", "DELE\n", "DELE\r\n", REQUIRED_ARGUMENT, 250},
-    {"QUIT", "QUIT\n", "QUIT\r\n", NO_ARGUMENT, 221},
-    {"PASV", "PASV\n", "PASV\r\n", NO_ARGUMENT, 227},
-    {"LIST", "LIST\n", "LIST\r\n", OPTIONAL_ARGUMENT, 150},
-    {"RETR", "RETR\n", "RETR\r\n", REQUIRED_ARGUMENT, 214},
-    {"STOR", "STOR\n", "STOR\r\n", REQUIRED_ARGUMENT, 150},
-    {"HELP", "HELP\n", "HELP\r\n", OPTIONAL_ARGUMENT, 214},
-    {"PWD", "PWD\n", "PWD\r\n", NO_ARGUMENT, 257},
+    {"NOOP", NO_ARGUMENT, 200},
+    {"CDUP", NO_ARGUMENT, 200},
+    {"PORT", NO_ARGUMENT, 200},
+    {"USER", REQUIRED_ARGUMENT, 331},
+    {"PASS", REQUIRED_ARGUMENT, 332},
+    {"CWD", REQUIRED_ARGUMENT, 250},
+    {"DELE", REQUIRED_ARGUMENT, 250},
+    {"QUIT", NO_ARGUMENT, 221},
+    {"PASV", NO_ARGUMENT, 227},
+    {"LIST", OPTIONAL_ARGUMENT, 150},
+    {"RETR", REQUIRED_ARGUMENT, 214},
+    {"STOR", REQUIRED_ARGUMENT, 150},
+    {"HELP", OPTIONAL_ARGUMENT, 214},
+    {"PWD", NO_ARGUMENT, 257},
 };
 
 void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
@@ -47,7 +47,6 @@ static char *parse_cmd(char *cmd)
 {
     int i = 0;
 
-    printf("####[%s]\n", cmd);
     while (cmd[i] != '\0') {
         if (cmd[i] != ' ')
             return (cmd);
@@ -56,39 +55,45 @@ static char *parse_cmd(char *cmd)
     return (strdup("BAD CMD\n"));
 }
 
+static void check_ftp_cmd(char *cmd, void (*fct_ptr[])\
+(ftp_t *, char *, client_list_t *), ftp_t *ftp, client_list_t *client)
+{
+    int i = 0;
+    char *tmp = NULL;
+
+    while (i < 14) {
+        if ((tmp = strstr(cmd, "\r")) != NULL || \
+            (tmp = strstr(cmd, "\r\n")) != NULL || \
+            (tmp = strstr(cmd, "\n")) != NULL ) {
+            *tmp = '\0';
+        }
+        if (strcmp(cmd, ftp_cmd[i].cmd) == 0) {
+            fct_ptr[i](ftp, ftp->cmd_parse[1], client);
+            break;
+        }
+        i++;
+    }
+    i == 14 ? dprintf(client->fd, "500 Unknown command.\n") : 0;
+    check_disconnect(ftp, client);
+}
+
 static void protocole_interpreter(ftp_t *ftp, int fd, \
 void (*fct_ptr[])(ftp_t *, char *, client_list_t *))
 {
     client_list_t *client = get_node_at_filedesc(&ftp->cli_list, fd);
-    int i = 0;
-    char *tmp;
-    char **cmd_p = my_str_to_word_array(ftp->buffer, ' ');
+    ftp->cmd_parse = my_str_to_word_array(ftp->buffer, ' ');
 
-    if (!cmd_p)
+    if (!ftp->cmd_parse)
         return;
-    char *cmd = parse_cmd(cmd_p[0]);
+    char *cmd = parse_cmd(ftp->cmd_parse[0]);
     if (!client || !cmd)
         return;
     if (client->is_connected == FALSE && strcmp(cmd, "QUIT") != 0 && \
         strcmp(cmd, "USER") != 0 && strcmp(cmd, "PASS") != 0) {
         dprintf(client->fd, "530 Please login with USER and PASS\n");
     } else {
-        while (i < 14) {
-            if ((tmp = strstr(cmd, "\r")) != NULL || \
-                (tmp = strstr(cmd, "\r\n")) != NULL || \
-                (tmp = strstr(cmd, "\n")) != NULL ) {
-                *tmp = '\0';
-            }
-            if (strcmp(cmd, ftp_cmd[i].cmd) == 0) {
-                fct_ptr[i](ftp, cmd_p[1], client);
-                break;
-            }
-            i++;
-        }
-        i == 14 ? dprintf(client->fd, "500 Unknown command.\n") : 0;
-        check_disconnect(ftp, client);
+        check_ftp_cmd(cmd, fct_ptr, ftp, client);
     }
-    printf("connextion %d\n", ftp->connexion);
     dump_list(ftp->cli_list);
 }
 
