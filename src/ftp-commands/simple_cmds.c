@@ -9,9 +9,15 @@
 
 void dele_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
+    char *tmp = NULL;
+
     if (!arg)
         dprintf(client->fd, "501 Errors in parameters or Arguments\r\n");
     else {
+        if ((tmp = strstr(arg, "\r")) != NULL || \
+            (tmp = strstr(arg, "\r\n")) != NULL || \
+            (tmp = strstr(arg, "\n")) != NULL )
+                *tmp = '\0';
         if (remove(arg) == -1) {
             perror("remove() -> dele_f()");
             dprintf(client->fd, "550 Requested action not taken. "

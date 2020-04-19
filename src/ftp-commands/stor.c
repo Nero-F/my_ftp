@@ -20,12 +20,15 @@ static bool_t check_data_sock(client_list_t *client)
 
 static int verif_file(char *path, int data_sock, client_list_t *client)
 {
-    int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
-
-    if (check_data_sock(client) == FALSE) {
-        printf("MES couilles\n");
+    int fd = 0;
+    char *tmp = NULL;
+    if (check_data_sock(client) == FALSE)
         return (84);
-    }
+    if ((tmp = strstr(path, "\r")) != NULL || \
+        (tmp = strstr(path, "\r\n")) != NULL || \
+        (tmp = strstr(path, "\n")) != NULL )
+            *tmp = '\0';
+    fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
     if ( fd == -1) {
         dprintf(client->fd, "550 failed to open file.\n");
         perror("");
