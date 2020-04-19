@@ -30,7 +30,6 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client)
             write(fdf, buffer, ret_read);
         }
         fclose(fp);
-        // close(fdf);
         dprintf(client->fd, "226 Closing data connection\n");
     }
 }

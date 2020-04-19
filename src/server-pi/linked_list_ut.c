@@ -68,16 +68,6 @@ void rm_at_filedesc(client_list_t **head, int fd)
     delete_node(head, tmp);
 }
 
-void dump_list(client_list_t *head)
-{
-    client_list_t *tmp = head;
-
-    while (tmp) {
-        printf("fd -> %d | ", tmp->fd);
-        tmp = tmp->nxt;
-    }
-}
-
 client_list_t *get_node_at_filedesc(client_list_t **head, int fd)
 {
     client_list_t *tmp = *head;
@@ -88,16 +78,4 @@ client_list_t *get_node_at_filedesc(client_list_t **head, int fd)
         tmp = tmp->nxt;
     }
     return (NULL);
-}
-
-void free_list(client_list_t **head)
-{
-    client_list_t *tmp = *head;
-    client_list_t *rmvr = *head;
-
-    while (tmp != NULL) {
-        tmp = rmvr->nxt;
-        free(rmvr);
-        rmvr = tmp;
-    }
 }

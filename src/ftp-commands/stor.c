@@ -53,7 +53,7 @@ void stor_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     socket_t *s = client->data_sock;
     int fdf = 0;
-    int fd = 0;;
+    int fd = 0;
     pid_t pid = 0;
 
     if (!arg && client->can_transfer == FALSE || !s) {

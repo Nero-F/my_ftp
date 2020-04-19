@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2020
+## my_ftp
+## File description:
+## Makefile
+##
+
 BLUE	=		\033[36m
 
 WHITE	=		\033[0m
@@ -12,6 +19,7 @@ SRC		=		src/main.c			\
 				src/my_ftp.c	\
 				src/server-pi/client_connexion.c	\
 				src/server-pi/linked_list_ut.c	\
+				src/server-pi/list_ut_bis.c	\
 				src/server-pi/server_pi.c	\
 				src/ftp-commands/auth.c	\
 				src/ftp-commands/retr.c	\
@@ -20,6 +28,7 @@ SRC		=		src/main.c			\
 				src/ftp-commands/passive.c	\
 				src/ftp-commands/active.c	\
 				src/ftp-commands/directory.c	\
+				src/ftp-commands/simple_cmds.c	\
 				src/ftp-commands/data_transfert_init.c	\
 
 OBJ		=		$(SRC:%.c=$(BUILD_DIR)/%.o)
@@ -33,7 +42,7 @@ override DEPFLGAS	+=	-MT $@ -MMD -MP -MF $(@:.o=.d)
 NAME	=		myftp
 
 $(NAME):	$(OBJ)
-	$(CC) $^ $(CFLAGS) -o $@ 
+	$(CC) $^ $(CFLAGS) -o $@
 
 all:	$(NAME) ## Build the binary and relinks if needed
 

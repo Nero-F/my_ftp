@@ -1,6 +1,13 @@
-#include <string.h> // strcmp
-#include <ctype.h> // ctype
-#include <stdlib.h> // atoi
+/*
+** EPITECH PROJECT, 2020
+** my_ftp
+** File description:
+** main function
+*/
+
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include "my_ftp.h"
 
 static void display_help(void)

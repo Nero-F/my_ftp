@@ -5,7 +5,6 @@
 ** active mode
 */
 
-#define _GNU_SOURCE
 #include "my_ftp.h"
 
 static int *parse_arg(char *arg, client_list_t *client, int *index)
@@ -32,6 +31,14 @@ static int *parse_arg(char *arg, client_list_t *client, int *index)
     return (int_tab);
 }
 
+static void connection(client_list_t *client)
+{
+    if (connect(client->data_sock->socket, \
+        (struct sockaddr *)&client->data_sock->addr, \
+        client->data_sock->addr_len) == -1)
+        perror("");
+}
+
 void port_f(ftp_t *ftp, char *arg, client_list_t *client)
 {
     int index = 0;
@@ -52,8 +59,5 @@ void port_f(ftp_t *ftp, char *arg, client_list_t *client)
         tab[4] * 256 + tab[5], ip);
         dprintf(client->fd, "200 PORT okay.\n");
     }
-    if (connect(client->data_sock->socket, \
-        (struct sockaddr *)&client->data_sock->addr, \
-        client->data_sock->addr_len) == -1)
-        perror("");
+    connection(client);
 }

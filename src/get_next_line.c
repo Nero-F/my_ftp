@@ -5,12 +5,12 @@
 ** get_next_line
 */
 
-#define READ_SIZE 32
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include "my_ftp.h"
 
 static void my_memset(char *dest, int x, int y)
 {

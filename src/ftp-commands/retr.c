@@ -29,20 +29,16 @@ int accept_data_sock(int fd, socket_t *data_sock)
 
 static int verif_file(char *path, int data_sock, client_list_t *client)
 {
-    // char *rpath = NULL;
     int fd = 0;
     int i = 0;
 
     char *tmp = path[0] == '/' ? path : realpath(path, NULL);
     printf("FPATH -> %s\n", tmp);
-    // rpath = copy_to_buff(path, client->path_dist);
-    // printf("RPATH -> %s\n", rpath);
     if (!tmp || (fd = open(tmp, O_RDONLY)) == -1) {
         dprintf(client->fd, "550 failed to open file.\n");
         perror("");
         return (84);
     }
-    // free(rpath);
     dprintf(client->fd, "150 File status okay;\n");
     return (fd);
 }
@@ -57,17 +53,14 @@ static void retrieve(int data_sock, char *path, client_list_t *client)
 
     if (fd == 84 || (fdf = accept_data_sock(fd, client->data_sock)) == 84)
         return;
-    if ((pid = fork()) == -1) {
+    if ((pid = fork()) == -1)
         close(fd);
-        perror("");
-        return;
-    } else if (pid == 0) {
+    else if (pid == 0) {
         while ((ret_read = read(fd, buffer, BUFFER_SIZE)) != 0) {
             write(fdf, buffer, ret_read);
         }
         close(fd);
         close(data_sock);
-        printf("yolo\n");
         dprintf(client->fd, "226 Closing data connection\r\n");
         client->can_transfer = FALSE;
     }
@@ -89,10 +82,9 @@ void retr_f(ftp_t *ftp, char *arg, client_list_t *client)
                     (tmp = strstr(arg, "\n")) != NULL )
             *tmp = '\0';
         fd = client->data_sock->socket;
-        if (fd == -1) {
+        if (fd == -1)
             dprintf(client->fd, "425 problem with connection.\n");
-            return;
-        }
-        retrieve(fd, arg,client);
+        else
+            retrieve(fd, arg, client);
     }
 }

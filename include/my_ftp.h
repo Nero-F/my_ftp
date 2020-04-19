@@ -5,8 +5,11 @@
 ** header file
 */
 
+
 #ifndef MY_FTP_H_
 #define MY_FTP_H_
+
+#define _GNU_SOURCE
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -16,6 +19,8 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+
+#define READ_SIZE 32
 
 #define NO_AUTH_DISCONNECT          0x40
 #define WRONG_USER_DISCONNECT       0x60
@@ -115,6 +120,9 @@ void port_f(ftp_t *ftp, char *arg, client_list_t *client);
 void retr_f(ftp_t *ftp, char *arg, client_list_t *client);
 void stor_f(ftp_t *ftp, char *arg, client_list_t *client);
 void dele_f(ftp_t *ftp, char *arg, client_list_t *client);
+void noop_f(ftp_t *ftp, char *arg, client_list_t *client);
+void quit_f(ftp_t *ftp, char *arg, client_list_t *client);
+void help_f(ftp_t *ftp, char *arg, client_list_t *client);
 void list_f(ftp_t *ftp, char *arg, client_list_t *client);
 void cdup_f(ftp_t *ftp, char *arg, client_list_t *client);
 void pwd_f(ftp_t *ftp, char *arg, client_list_t *client);

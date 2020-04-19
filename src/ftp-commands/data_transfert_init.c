@@ -5,13 +5,10 @@
 ** initialisation of the data transfert protocole (active|passive)
 */
 
-#define _GNU_SOURCE
-
+#include "my_ftp.h"
 #include <netinet/in.h>
 #include <errno.h>
-#include <stdio.h>
 #include <netdb.h>
-#include "my_ftp.h"
 
 char *disp_port(struct sockaddr_in *addr, char *ip)
 {
@@ -25,7 +22,7 @@ char *disp_port(struct sockaddr_in *addr, char *ip)
         }
         index++;
     }
-    printf("port ---> %d\n", port);
+    printf("port -> %d\n", port);
     asprintf(&result, "%s,%d,%d", ip, port / 256, port % 256);
     return (result);
 }
@@ -38,7 +35,7 @@ socket_t *setup_data_socket(void)
         return (NULL);
     }
     data_sock->socket = socket(AF_INET, SOCK_STREAM, \
-    getprotobyname("TCP")->p_proto); 
+    getprotobyname("TCP")->p_proto);
     if (data_sock->socket == -1) {
         fprintf(stderr, "socket() -> PASV", strerror(errno));
         return (NULL);

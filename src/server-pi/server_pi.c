@@ -26,23 +26,6 @@ const ftp_cmd_t ftp_cmd[] = {
     {"PWD", NO_ARGUMENT, 257},
 };
 
-void noop_f(ftp_t *ftp, char *arg, client_list_t *client)
-{
-    printf("[%s]\n", arg);
-    dprintf(client->fd, "200 NOOP okay.\n");
-}
-
-void quit_f(ftp_t *ftp, char *arg, client_list_t *client)
-{
-    dprintf(client->fd, "221 Goodbye.\n");
-    client->has_auth |= (1 << 6);
-}
-
-void help_f(ftp_t *ftp, char *arg, client_list_t *client)
-{
-    dprintf(client->fd, "214 LOL.\n");
-}
-
 static char *parse_cmd(char *cmd)
 {
     int i = 0;
