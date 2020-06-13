@@ -48,6 +48,10 @@ void list_f(ftp_t *ftp, char *arg, client_list_t *client)
     FILE *fp = NULL;
     int fdf = 0;
 
+    if (client->can_transfer == FALSE) {
+        dprintf(client->fd, "425 Use PORT or PASV first.\n");
+        return;
+    }
     if (!arg)
         fp = popen("ls -l", "r");
     else

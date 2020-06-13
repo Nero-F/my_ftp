@@ -71,7 +71,7 @@ void cwd_f(ftp_t *ftp, char *arg, client_list_t *client)
     char *tmp = NULL;
 
     if  (!arg) {
-        dprintf(client->fd, "501 Errors in parameters or Arguments\r\n");
+        dprintf(client->fd, "550 Errors in parameters or Arguments\r\n");
         return;
     }
     if ((tmp = strstr(arg, "\r")) != NULL || \
